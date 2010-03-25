@@ -5,13 +5,16 @@
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<link rel="stylesheet" href="css/flick/jquery-ui-1.8.custom.css" type="text/css" media="screen"/>
 	<link rel="stylesheet" href="css/application.css" type="text/css" media="screen"/>
-	<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAKVoXzgrIV4JPVvS3ioLX3RSmbtbI58sJnUq1AueY0BvTVoVv3BSN2isRsxARF7SBx_7uHXvrKzM_XQ"></script>
+	<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAKVoXzgrIV4JPVvS3ioLX3RSmbtbI58sJnUq1AueY0BvTVoVv3BSN2isRsxARF7SBx_7uHXvrKzM_XQ"></script>
+	<script type="text/javascript">
+	  google.load("maps", "2");
+	</script>
 	<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
 	<script type="text/javascript" src="js/jquery-ui-1.8.custom.min.js"></script>
 	<script type="text/javascript" charset="utf-8">
 		;(function($) {
 			$(function() {
-				
+
 				// ====== Create the Euclidean Projection for the flat map ======
 				// == Constructor ==
 				function EuclideanProjection(a){
@@ -68,18 +71,19 @@
 				EuclideanProjection.prototype.getWrapWidth = function(zoom) {
 				  return this.tileBounds[zoom]*256;
 				};
-				
-				
+
+
 				if (GBrowserIsCompatible()) {
 
 				  var tilelayers = [new GTileLayer(new GCopyrightCollection("Fractal: Mike Williams"),0,3)];
 						  tilelayers[0].getCopyright = function(a,b) {
-								return { 
-									prefix: "Fractal: &copy;", 
-									copyrightTexts: ["Mike Williams"] 
+								return {
+									prefix: "Fractal: &copy;",
+									copyrightTexts: ["Mike Williams"]
 								};
 							};
 						  tilelayers[0].getTileUrl = function (a,b) {
+								console.log("tiles/tilez"+b+"_"+(a.y+1)+"x"+(a.x+1)+".jpg");
 						    return "tiles/tilez"+b+"_"+(a.y+1)+"x"+(a.x+1)+".jpg";
 						  };
 
@@ -99,7 +103,7 @@
 				  map.addOverlay(new GPolyline(points, "#FF0000", null, 1));
 
 				};
-				
+
 			});
 		})(jQuery);
 	</script>
