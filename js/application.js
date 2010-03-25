@@ -1,81 +1,36 @@
-function HomeControl(controlDiv, map) {
-  controlDiv.style.padding = '5px';
-
-  // Set CSS for the control border
-  var controlUI = document.createElement('DIV');
-  controlUI.style.backgroundColor = 'white';
-  controlUI.style.borderStyle = 'solid';
-  controlUI.style.borderWidth = '2px';
-  controlUI.style.cursor = 'pointer';
-  controlUI.style.textAlign = 'center';
-  controlUI.title = 'Click to set the map to Home';
-  controlDiv.appendChild(controlUI);
-
-  // Set CSS for the control interior
-  var controlText = document.createElement('DIV');
-  controlText.style.fontFamily = 'Arial,sans-serif';
-  controlText.style.fontSize = '12px';
-  controlText.style.paddingLeft = '4px';
-  controlText.style.paddingRight = '4px';
-  controlText.innerHTML = 'Home';
-  controlUI.appendChild(controlText);
-
-	var chicago = new google.maps.LatLng(41.850033, -87.6500523);
-
-  google.maps.event.addDomListener(controlUI, 'click', function() {
-    map.setCenter(chicago)
-  });
-};
-
-function placeMarker(map, location) {
-	var clickedLocation = new google.maps.LatLng(location);
-	var marker = new google.maps.Marker({
-		position: location,
-		map: map
-	});
-	map.setCenter(location);
-};
-
 ;(function($) {
 	$(function() {
 
-		var myOptions = {
-			zoom: 8,
-			center: new google.maps.LatLng(43.6319, -70.2928), // South Portland
-			// disableDefaultUI: true,
-			navigationControl: true,
-			navigationControlOptions: {
-				style: google.maps.NavigationControlStyle.DEFAULT,
-				position: google.maps.ControlPosition.TOP_LEFT
-			},
-			mapTypeControl: true,
-			mapTypeControlOptions: {
-				style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-			},
-			scaleControl: true,
-			mapTypeId: google.maps.MapTypeId.HYBRID
+		if (GBrowserIsCompatible()) {
+
+		  var tilelayers = [new GTileLayer(new GCopyrightCollection("Fractal: Mike Williams"),0,3)];
+				  tilelayers[0].getCopyright = function(a,b) {
+						return {
+							prefix: "Fractal: &copy;",
+							copyrightTexts: ["Mike Williams"]
+						};
+					};
+				  tilelayers[0].getTileUrl = function (a,b) {
+						console.log("tiles/tilez"+b+"_"+(a.y+1)+"x"+(a.x+1)+".jpg");
+				    return "tiles/tilez"+b+"_"+(a.y+1)+"x"+(a.x+1)+".jpg";
+				  };
+
+		  var custommap = new GMapType(tilelayers, new EuclideanProjection(18), "Euclidean", { errorMessage: "No Data Available", alt: "My Flat Projection" });
+		  var map = new GMap2(document.getElementById("map_canvas"), { mapTypes: [custommap] });
+				  map.addControl(new GLargeMapControl());
+				  map.addControl(new GMapTypeControl());
+				  map.setCenter(new GLatLng(0,0), 1, custommap);
+
+		  // == A line of points from one corner to the other ==
+		  var points=[];
+		  for (var i=-85; i<85; i+=7) {
+		    var P = new GLatLng(i, i*2);
+		    map.addOverlay(new GMarker(P));
+		    points.push(P);
+		  };
+		  map.addOverlay(new GPolyline(points, "#FF0000", null, 1));
+
 		};
-		var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-
-		// google.maps.event.addListener(map, 'bounds_changed', function(event) {
-		// 	// console.log("bounds_changed", this, event);
-		// });
-		// google.maps.event.addListener(map, 'center_changed', function(event) {
-		// 	// console.log("center_changed", this, event);
-		// });
-		// google.maps.event.addListener(map, 'zoom_changed', function(event) {
-		// 	// console.log("zoom_changed", this, event);
-		// });
-
-		google.maps.event.addListener(map, 'click', function(event) {
-			placeMarker(map, event.latLng);
-			console.log(event.latLng.b, event.latLng.c, '|', event.pixel.x, event.pixel.y);
-		});
-
-	  var homeControlDiv = document.createElement('DIV');
-	  var homeControl = new HomeControl(homeControlDiv, map);
-	  homeControlDiv.index = 1;
-	  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
 
 	});
 })(jQuery);
