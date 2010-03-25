@@ -1,0 +1,114 @@
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+	<title>Page Title</title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" href="css/flick/jquery-ui-1.8.custom.css" type="text/css" media="screen"/>
+	<link rel="stylesheet" href="css/application.css" type="text/css" media="screen"/>
+	<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAKVoXzgrIV4JPVvS3ioLX3RSmbtbI58sJnUq1AueY0BvTVoVv3BSN2isRsxARF7SBx_7uHXvrKzM_XQ"></script>
+	<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.custom.min.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		;(function($) {
+			$(function() {
+				
+				// ====== Create the Euclidean Projection for the flat map ======
+				// == Constructor ==
+				function EuclideanProjection(a){
+				  this.pixelsPerLonDegree = [];
+				  this.pixelsPerLonRadian = [];
+				  this.pixelOrigo = [];
+				  this.tileBounds = [];
+				  var b = 256;
+				  var c = 1;
+				  for(var d=0; d<a; d++){
+				    var e = b/2;
+				    this.pixelsPerLonDegree.push(b/360);
+				    this.pixelsPerLonRadian.push(b/(2*Math.PI));
+				    this.pixelOrigo.push(new GPoint(e,e));
+				    this.tileBounds.push(c);
+				    b *= 2;
+				    c *= 2;
+				  };
+				};
+
+				// == Attach it to the GProjection() class ==
+				EuclideanProjection.prototype = new GProjection();
+
+				// == A method for converting latitudes and longitudes to pixel coordinates ==
+				EuclideanProjection.prototype.fromLatLngToPixel = function(a,b){
+				  var c = Math.round(this.pixelOrigo[b].x+a.lng()*this.pixelsPerLonDegree[b]);
+				  var d = Math.round(this.pixelOrigo[b].y+(-2*a.lat())*this.pixelsPerLonDegree[b]);
+				  return new GPoint(c,d);
+				};
+
+				// == a method for converting pixel coordinates to latitudes and longitudes ==
+				EuclideanProjection.prototype.fromPixelToLatLng = function(a,b,c){
+				  var d = (a.x-this.pixelOrigo[b].x)/this.pixelsPerLonDegree[b];
+				  var e = -0.5*(a.y-this.pixelOrigo[b].y)/this.pixelsPerLonDegree[b];
+				  return new GLatLng(e,d,c);
+				};
+
+				// == a method that checks if the y value is in range, and wraps the x value ==
+				EuclideanProjection.prototype.tileCheckRange = function(a,b,c){
+				  var d = this.tileBounds[b];
+				  if (a.y<0||a.y>=d) {
+				    return false;
+				  };
+				  if(a.x<0||a.x>=d){
+				    a.x = a.x%d;
+				    if(a.x<0){
+				      a.x += d;
+				    }
+				  };
+				  return true;
+				};
+
+				// == a method that returns the width of the tilespace ==
+				EuclideanProjection.prototype.getWrapWidth = function(zoom) {
+				  return this.tileBounds[zoom]*256;
+				};
+				
+				
+				if (GBrowserIsCompatible()) {
+
+				  var tilelayers = [new GTileLayer(new GCopyrightCollection("Fractal: Mike Williams"),0,3)];
+						  tilelayers[0].getCopyright = function(a,b) {
+								return { 
+									prefix: "Fractal: &copy;", 
+									copyrightTexts: ["Mike Williams"] 
+								};
+							};
+						  tilelayers[0].getTileUrl = function (a,b) {
+						    return "tiles/tilez"+b+"_"+(a.y+1)+"x"+(a.x+1)+".jpg";
+						  };
+
+				  var custommap = new GMapType(tilelayers, new EuclideanProjection(18), "Euclidean", { errorMessage: "No Data Available", alt: "My Flat Projection" });
+				  var map = new GMap2(document.getElementById("map_canvas"), { mapTypes: [custommap] });
+						  map.addControl(new GLargeMapControl());
+						  map.addControl(new GMapTypeControl());
+						  map.setCenter(new GLatLng(0,0), 1, custommap);
+
+				  // == A line of points from one corner to the other ==
+				  var points=[];
+				  for (var i=-85; i<85; i+=7) {
+				    var P = new GLatLng(i, i*2);
+				    map.addOverlay(new GMarker(P));
+				    points.push(P);
+				  };
+				  map.addOverlay(new GPolyline(points, "#FF0000", null, 1));
+
+				};
+				
+			});
+		})(jQuery);
+	</script>
+</head>
+<body>
+
+<div id="header">Header</div>
+<div id="map_canvas" style="width: 100%; height: 500px"></div>
+<div id="footer">Footer</div>
+
+</body>
+</html>
