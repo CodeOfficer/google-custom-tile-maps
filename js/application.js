@@ -3,11 +3,11 @@
 
 		if (GBrowserIsCompatible()) {
 
-		  var tilelayers = [new GTileLayer(new GCopyrightCollection("Fractal: Mike Williams"),0,3)];
+		  var tilelayers = [new GTileLayer(new GCopyrightCollection("CodeOfficer.com: Russ Jones"),0,3)];
 				  tilelayers[0].getCopyright = function(a,b) {
 						return {
-							prefix: "Fractal: &copy;",
-							copyrightTexts: ["Mike Williams"]
+							prefix: "CodeOfficer.com: &copy;",
+							copyrightTexts: ["Russ Jones"]
 						};
 					};
 				  tilelayers[0].getTileUrl = function (a,b) {
